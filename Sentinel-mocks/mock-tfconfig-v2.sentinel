@@ -1,0 +1,110 @@
+import "strings"
+
+providers = {
+	"google": {
+		"alias": "",
+		"config": {
+			"access_token": {
+				"references": [
+					"var.access_token",
+				],
+			},
+			"project": {
+				"constant_value": "airline1-sabre-wolverine",
+			},
+		},
+		"module_address":      "",
+		"name":                "google",
+		"provider_config_key": "google",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"google_compute_health_check.default": {
+		"address": "google_compute_health_check.default",
+		"config": {
+			"check_interval_sec": {
+				"constant_value": 1,
+			},
+			"name": {
+				"constant_value": "rbs-health-check",
+			},
+			"tcp_health_check": [
+				{
+					"port": {
+						"constant_value": "80",
+					},
+				},
+			],
+			"timeout_sec": {
+				"constant_value": 1,
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "default",
+		"provider_config_key": "google",
+		"provisioners":        [],
+		"type":                "google_compute_health_check",
+	},
+	"google_compute_region_backend_service.default": {
+		"address": "google_compute_region_backend_service.default",
+		"config": {
+			"connection_draining_timeout_sec": {
+				"constant_value": 10,
+			},
+			"health_checks": {
+				"references": [
+					"google_compute_health_check.default.id",
+					"google_compute_health_check.default",
+				],
+			},
+			"name": {
+				"constant_value": "region-service",
+			},
+			"region": {
+				"constant_value": "us-central1",
+			},
+			"session_affinity": {
+				"constant_value": "CLIENT_IP",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "default",
+		"provider_config_key": "google",
+		"provisioners":        [],
+		"type":                "google_compute_region_backend_service",
+	},
+}
+
+provisioners = {}
+
+variables = {
+	"access_token": {
+		"default":        null,
+		"description":    "access token",
+		"module_address": "",
+		"name":           "access_token",
+	},
+}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

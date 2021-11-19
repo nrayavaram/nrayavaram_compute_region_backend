@@ -1,0 +1,121 @@
+import "strings"
+import "types"
+
+_modules = {
+	"root": {
+		"data":    {},
+		"modules": {},
+		"outputs": {},
+		"providers": {
+			"google": {
+				"alias": {
+					"": {
+						"config": {
+							"project": "airline1-sabre-wolverine",
+						},
+						"references": {
+							"access_token": [
+								"var.access_token",
+							],
+							"project": [],
+						},
+						"version": "",
+					},
+				},
+				"config": {
+					"project": "airline1-sabre-wolverine",
+				},
+				"references": {
+					"access_token": [
+						"var.access_token",
+					],
+					"project": [],
+				},
+				"version": "",
+			},
+		},
+		"resources": {
+			"google_compute_health_check": {
+				"default": {
+					"config": {
+						"check_interval_sec": 1,
+						"name":               "rbs-health-check",
+						"tcp_health_check": [
+							{
+								"port": "80",
+							},
+						],
+						"timeout_sec": 1,
+					},
+					"provisioners": null,
+					"references": {
+						"check_interval_sec": [],
+						"name":               [],
+						"tcp_health_check": [
+							{
+								"port": [],
+							},
+						],
+						"timeout_sec": [],
+					},
+				},
+			},
+			"google_compute_region_backend_service": {
+				"default": {
+					"config": {
+						"connection_draining_timeout_sec": 10,
+						"name":             "region-service",
+						"region":           "us-central1",
+						"session_affinity": "CLIENT_IP",
+					},
+					"provisioners": null,
+					"references": {
+						"connection_draining_timeout_sec": [],
+						"health_checks": [
+							"google_compute_health_check.default.id",
+							"google_compute_health_check.default",
+						],
+						"name":             [],
+						"region":           [],
+						"session_affinity": [],
+					},
+				},
+			},
+		},
+		"variables": {
+			"access_token": {
+				"default":     null,
+				"description": "access token",
+			},
+		},
+	},
+}
+
+module_paths = [
+	[],
+]
+
+module = func(path) {
+	if types.type_of(path) is not "list" {
+		error("expected list, got", types.type_of(path))
+	}
+
+	if length(path) < 1 {
+		return _modules.root
+	}
+
+	addr = []
+	for path as p {
+		append(addr, "module")
+		append(addr, p)
+	}
+
+	return _modules[strings.join(addr, ".")]
+}
+
+data = _modules.root.data
+modules = _modules.root.modules
+providers = _modules.root.providers
+resources = _modules.root.resources
+variables = _modules.root.variables
+outputs = _modules.root.outputs
