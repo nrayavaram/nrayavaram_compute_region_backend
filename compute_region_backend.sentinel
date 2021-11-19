@@ -1,0 +1,23 @@
+import "tfplan-functions" as plan
+import "strings"
+import "types"
+
+backendServiceResources = plan.find_resources("google_compute_region_backend_service")
+
+############################## Check for health_checks is enabled in  LoadBalancer  ##############################
+
+messages = {}
+for backendServiceResources as address, rc {
+	health_checks = rc["change"]["after"]["health_checks"]
+	if types.type_of(health_checks) is not "undefined" {
+		if health_checks is null {
+			messages[address] = "health_checks Needs to be enabled for google_compute_region_backend_service"
+		}
+	}
+}
+
+############################## Check for all_ports is enabled in  LoadBalancer  ##############################
+print(messages)
+GCP_LB_HC = rule { length(messages) is 0 }
+
+main = rule { GCP_LB_HC }
